@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	DEFAULT_PAGE_LENGTH = 2
+	DEFAULT_PAGE_LENGTH = 20
 )
 
 func handlerItem(w http.ResponseWriter, r *http.Request) {
@@ -22,17 +22,38 @@ func handlerItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var err error
 	switch r.Method {
 	case "POST":
-		err = repo.Add(&item)
+		handlerItemPost(&item, w)
 	case "PUT":
-		err = repo.Update(&item)
+		handlerItemPut(&item, w)
 	default:
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 	}
+}
 
-	if err != nil {
+// @Summary Add item
+// @Description Add single item
+// @Tags items
+// @Accept  json
+// @Param item body items.Item true "Item to add"
+// @Success 200
+// @Router /item [post]
+func handlerItemPost(item *items.Item, w http.ResponseWriter) {
+	if err := repo.Add(item); err != nil {
+		http.Error(w, err.Error(), getStatusFromError(err))
+	}
+}
+
+// @Summary Update item
+// @Description Update single item
+// @Tags items
+// @Accept  json
+// @Param item body items.Item true "New item to update. Item with updated id should be already added."
+// @Success 200
+// @Router /item [put]
+func handlerItemPut(item *items.Item, w http.ResponseWriter) {
+	if err := repo.Update(item); err != nil {
 		http.Error(w, err.Error(), getStatusFromError(err))
 	}
 }
@@ -55,6 +76,13 @@ func handlerItemId(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @Summary Get item
+// @Description Get single item by id
+// @Tags items
+// @Produce json
+// @Param id path int true "Item id"
+// @Success 200 {object} items.Item
+// @Router /item/{id} [get]
 func handlerItemGet(id uint64, w http.ResponseWriter) {
 	item, err := repo.Get(id)
 	if err != nil {
@@ -68,12 +96,25 @@ func handlerItemGet(id uint64, w http.ResponseWriter) {
 	}
 }
 
+// @Summary Delete item
+// @Description Delete single item by id
+// @Tags items
+// @Param id path int true "Item id"
+// @Success 200
+// @Router /item/{id} [delete]
 func handlerItemDelete(id uint64, w http.ResponseWriter) {
 	if err := repo.Delete(id); err != nil {
 		http.Error(w, err.Error(), getStatusFromError(err))
 	}
 }
 
+// @Summary List items
+// @Description List all items with optional pagination
+// @Tags items
+// @Produce json
+// @Param page query int false "Return items from this page. If not specified, return all items"
+// @Success 200 {array} items.Item
+// @Router /items [get]
 func handlerList(w http.ResponseWriter, r *http.Request) {
 	var list []items.Item
 	var err error

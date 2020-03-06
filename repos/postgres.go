@@ -38,12 +38,12 @@ func NewPostgresRepo() Repo {
 	return &PostgresRepo{db}
 }
 
-func (repo *PostgresRepo) Get(Id uint64) (*Item, error) {
-	row := repo.db.QueryRow("SELECT * FROM items WHERE Id = $1", Id)
+func (repo *PostgresRepo) Get(id uint64) (*Item, error) {
+	row := repo.db.QueryRow("SELECT * FROM items WHERE Id = $1", id)
 	item, err := FromRow(row)
 
 	if err == sql.ErrNoRows {
-		return nil, &ItemNotFoundError{Id}
+		return nil, &ItemNotFoundError{id}
 	} else if err != nil {
 		return nil, err
 	}
@@ -75,13 +75,13 @@ func (repo *PostgresRepo) Update(newItem *Item) error {
 	return err
 }
 
-func (repo *PostgresRepo) Delete(Id uint64) error {
-	row := repo.db.QueryRow(`DELETE FROM items WHERE Id = $1 RETURNING Id`, Id)
+func (repo *PostgresRepo) Delete(id uint64) error {
+	row := repo.db.QueryRow(`DELETE FROM items WHERE Id = $1 RETURNING Id`, id)
 
 	var deleted uint64
 	err := row.Scan(&deleted)
 	if err == sql.ErrNoRows {
-		return &ItemNotFoundError{Id}
+		return &ItemNotFoundError{id}
 	}
 
 	return err
