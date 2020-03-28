@@ -7,12 +7,7 @@ import (
 
 	. "github.com/CurtizJ/dummy-shop/errors"
 	. "github.com/CurtizJ/dummy-shop/items"
-	"github.com/jackc/pgconn"
 	_ "github.com/jackc/pgx/v4/stdlib"
-)
-
-const (
-	PG_CONSTRAINT_VIOLATES_ERROR_CODE = "23505"
 )
 
 type PostgresRepo struct {
@@ -27,7 +22,7 @@ func NewPostgresRepo() Repo {
 
 	_, err = db.Exec(
 		`CREATE TABLE IF NOT EXISTS items(
-			Id integer PRIMARY KEY,
+			Id serial PRIMARY KEY,
 			name varchar(100),
 			category varchar(100))`)
 
@@ -52,13 +47,9 @@ func (repo *PostgresRepo) Get(id uint64) (*Item, error) {
 }
 
 func (repo *PostgresRepo) Add(item *Item) error {
-	_, err := repo.db.Exec("INSERT INTO items VALUES ($1, $2, $3)", item.Id, item.Name, item.Category)
-
-	if pgErr, ok := err.(*pgconn.PgError); ok && pgErr.Code == PG_CONSTRAINT_VIOLATES_ERROR_CODE {
-		return &ItemAlreadyExistsError{item.Id}
-	}
-
-	return err
+	return repo.db.QueryRow(
+		"INSERT INTO items (name, category) VALUES ($1, $2) RETURNING Id",
+		item.Name, item.Category).Scan(&item.Id)
 }
 
 func (repo *PostgresRepo) Update(newItem *Item) error {

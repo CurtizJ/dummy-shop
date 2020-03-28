@@ -121,8 +121,14 @@
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Return items from this page. If not specified, return all items",
-                        "name": "page",
+                        "description": "Return at most 'length' items.",
+                        "name": "length",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Skip first 'offset' items. Must be specified with 'length'",
+                        "name": "offset",
                         "in": "query"
                     }
                 ],
