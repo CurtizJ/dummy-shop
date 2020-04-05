@@ -6,19 +6,16 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/CurtizJ/dummy-shop/errors"
-	"github.com/CurtizJ/dummy-shop/items"
+	"github.com/CurtizJ/dummy-shop/lib/errors"
+	"github.com/CurtizJ/dummy-shop/api/items"
 	"github.com/gorilla/mux"
 )
 
-const (
-	DEFAULT_PAGE_LENGTH = 20
-)
-
 func handlerItem(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
 	var item items.Item
 	if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		errors.ReportAsJSON(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -41,7 +38,11 @@ func handlerItem(w http.ResponseWriter, r *http.Request) {
 // @Router /item [post]
 func handlerItemPost(item *items.Item, w http.ResponseWriter) {
 	if err := repo.Add(item); err != nil {
-		http.Error(w, err.Error(), getStatusFromError(err))
+		errors.ReportErrorAsJSON(w, err)
+		return
+	}
+	if err := json.NewEncoder(w).Encode(item); err != nil {
+		errors.ReportErrorAsJSON(w, err)
 	}
 }
 
@@ -54,15 +55,20 @@ func handlerItemPost(item *items.Item, w http.ResponseWriter) {
 // @Router /item [put]
 func handlerItemPut(item *items.Item, w http.ResponseWriter) {
 	if err := repo.Update(item); err != nil {
-		http.Error(w, err.Error(), getStatusFromError(err))
+		errors.ReportErrorAsJSON(w, err)
+		return
+	}
+	if err := json.NewEncoder(w).Encode(item); err != nil {
+		errors.ReportErrorAsJSON(w, err)
 	}
 }
 
 func handlerItemId(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
 	strId := mux.Vars(r)["id"]
 	id, err := strconv.ParseUint(strId, 10, 64)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Invalid id: %s", strId), http.StatusBadRequest)
+		errors.ReportAsJSON(w, fmt.Sprintf("Invalid id: %s", strId), http.StatusBadRequest)
 		return
 	}
 
@@ -72,7 +78,7 @@ func handlerItemId(w http.ResponseWriter, r *http.Request) {
 	case "DELETE":
 		handlerItemDelete(id, w)
 	default:
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		errors.ReportAsJSON(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 	}
 }
 
@@ -86,13 +92,12 @@ func handlerItemId(w http.ResponseWriter, r *http.Request) {
 func handlerItemGet(id uint64, w http.ResponseWriter) {
 	item, err := repo.Get(id)
 	if err != nil {
-		http.Error(w, err.Error(), getStatusFromError(err))
+		errors.ReportErrorAsJSON(w, err)
 		return
 	}
 
-	w.Header().Add("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(item); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		errors.ReportErrorAsJSON(w, err)
 	}
 }
 
@@ -104,7 +109,7 @@ func handlerItemGet(id uint64, w http.ResponseWriter) {
 // @Router /item/{id} [delete]
 func handlerItemDelete(id uint64, w http.ResponseWriter) {
 	if err := repo.Delete(id); err != nil {
-		http.Error(w, err.Error(), getStatusFromError(err))
+		errors.ReportErrorAsJSON(w, err)
 	}
 }
 
@@ -112,40 +117,50 @@ func handlerItemDelete(id uint64, w http.ResponseWriter) {
 // @Description List all items with optional pagination
 // @Tags items
 // @Produce json
-// @Param page query int false "Return items from this page. If not specified, return all items"
+// @Param length query int false "Return at most 'length' items."
+// @Param offset query int false "Skip first 'offset' items. Must be specified with 'length'"
 // @Success 200 {array} items.Item
 // @Router /items [get]
 func handlerList(w http.ResponseWriter, r *http.Request) {
 	var list []items.Item
 	var err error
 
-	strPage, exists := r.URL.Query()["page"]
-	if exists {
-		page, err := strconv.ParseUint(strPage[0], 10, 64)
-		if err != nil || page == 0 {
-			http.Error(w, fmt.Sprintf("Invalid value for page: %s", strPage[0]), http.StatusBadRequest)
+	strLength, existsLimit := r.URL.Query()["length"]
+	strOffset, existsOffset := r.URL.Query()["offset"]
+
+	if existsOffset && !existsLimit {
+		errors.ReportAsJSON(w, "Offset must be specified only with length", http.StatusBadRequest)
+		return
+	}
+
+	if existsLimit {
+		length, err := strconv.ParseUint(strLength[0], 10, 64)
+		if err != nil {
+			errors.ReportAsJSON(w, fmt.Sprintf("Invalid value for length: %s", strLength[0]), http.StatusBadRequest)
 			return
 		}
-		list, err = repo.List(DEFAULT_PAGE_LENGTH, DEFAULT_PAGE_LENGTH*(page-1))
+
+		offset := uint64(0)
+		if existsOffset {
+			offset, err = strconv.ParseUint(strOffset[0], 10, 64)
+			if err != nil {
+				errors.ReportAsJSON(w, fmt.Sprintf("Invalid value for offset: %s", strLength[0]), http.StatusBadRequest)
+				return
+			}
+		}
+
+		list, err = repo.List(length, offset)
 	} else {
 		list, err = repo.ListAll()
 	}
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		errors.ReportErrorAsJSON(w, err)
 		return
 	}
 
 	w.Header().Add("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(list); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		errors.ReportErrorAsJSON(w, err)
 	}
-}
-
-func getStatusFromError(err error) int {
-	if appErr, ok := err.(errors.ApplicationError); ok {
-		return appErr.GetHTTPStatus()
-	}
-
-	return http.StatusInternalServerError
 }

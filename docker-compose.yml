@@ -1,7 +1,7 @@
 version: '3'
 services:
     app:
-        build: .
+        build: ./api
         ports:
             - "8181:8181"
         environment:

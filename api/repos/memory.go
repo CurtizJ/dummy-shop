@@ -3,16 +3,17 @@ package repos
 import (
 	"errors"
 
-	. "github.com/CurtizJ/dummy-shop/errors"
-	. "github.com/CurtizJ/dummy-shop/items"
+	. "github.com/CurtizJ/dummy-shop/lib/errors"
+	. "github.com/CurtizJ/dummy-shop/api/items"
 )
 
 type MemoryRepo struct {
-	items map[uint64]*Item
+	items     map[uint64]*Item
+	currentId uint64
 }
 
 func NewMemoryRepo() Repo {
-	return &MemoryRepo{make(map[uint64]*Item, 0)}
+	return &MemoryRepo{make(map[uint64]*Item, 0), 0}
 }
 
 func (repo *MemoryRepo) Get(Id uint64) (*Item, error) {
@@ -24,10 +25,8 @@ func (repo *MemoryRepo) Get(Id uint64) (*Item, error) {
 }
 
 func (repo *MemoryRepo) Add(item *Item) error {
-	if _, found := repo.items[item.Id]; found {
-		return &ItemAlreadyExistsError{item.Id}
-	}
-
+	item.Id = repo.currentId
+	repo.currentId++
 	repo.items[item.Id] = item
 	return nil
 }
