@@ -1,6 +1,6 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/CurtizJ/dummy-shop v0.0.0-20200328190549-cfe72ff1fd65 h1:ADp0FE4dU/v8gi3pXBN/Xh43W7HD2SuL5FP65PWaoHw=
-github.com/CurtizJ/dummy-shop v0.0.0-20200328190549-cfe72ff1fd65/go.mod h1:MEwPJInAgveJWP6fOv9YQJRD5HqLRLGv9l3PxsyY5aY=
+github.com/CurtizJ/dummy-shop/lib v0.0.0-20200405140846-246a78b87654 h1:xBuR4QBL71VoZ8D2R91Lyns2AD9P/mGlffYJs5f6qKU=
+github.com/CurtizJ/dummy-shop/lib v0.0.0-20200405140846-246a78b87654/go.mod h1:Tnyna/JUveWdWgJpGoa+HK9HUF/eMroJ2o6YagZSEqQ=
 github.com/KyleBanks/depth v1.2.1 h1:5h8fQADFrWtarTdtDudMmGsC7GPbOAu6RVB3ffsVFHc=
 github.com/KyleBanks/depth v1.2.1/go.mod h1:jzSb9d0L43HxTQfT+oSA1EEp2q+ne2uh6XgeJcm8brE=
 github.com/PuerkitoBio/purell v1.1.0/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbtSwDGJws/X0=

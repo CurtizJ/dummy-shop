@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	. "github.com/CurtizJ/dummy-shop/api/items"
-	. "github.com/CurtizJ/dummy-shop/errors"
+	. "github.com/CurtizJ/dummy-shop/lib/errors"
 )
 
 type MemoryRepo struct {

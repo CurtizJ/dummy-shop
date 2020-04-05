@@ -6,7 +6,7 @@ import (
 	"os"
 
 	. "github.com/CurtizJ/dummy-shop/api/items"
-	. "github.com/CurtizJ/dummy-shop/errors"
+	. "github.com/CurtizJ/dummy-shop/lib/errors"
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
