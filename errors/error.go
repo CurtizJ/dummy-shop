@@ -11,6 +11,7 @@ const (
 	UNKNOWN_ERROR ErrorCode = iota
 	ITEM_NOT_FOUND
 	ITEM_ALREADY_EXISTS
+	USER_ALREADY_EXISTS
 )
 
 type ApplicationError interface {
@@ -48,4 +49,20 @@ func (err *ItemAlreadyExistsError) GetHTTPStatus() int {
 
 func (err *ItemAlreadyExistsError) Code() ErrorCode {
 	return ITEM_ALREADY_EXISTS
+}
+
+type UserAlreadyExistsError struct {
+	UserEmail string
+}
+
+func (err *UserAlreadyExistsError) Error() string {
+	return fmt.Sprintf("User with email=%s already registered", err.UserEmail)
+}
+
+func (err *UserAlreadyExistsError) GetHTTPStatus() int {
+	return http.StatusBadRequest
+}
+
+func (err *UserAlreadyExistsError) Code() ErrorCode {
+	return USER_ALREADY_EXISTS
 }

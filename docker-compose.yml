@@ -1,11 +1,10 @@
 version: '3'
 services:
     app:
-        build: .
+        build: ./api
         ports:
             - "8181:8181"
         environment:
-            PG_PASS: somepassword
             PG_URL:  postgres://${PG_USER}:${PG_PASSWORD}@postgres:5432/postgres
             LISTEN_PORT: :8181
         restart: always
@@ -19,6 +18,24 @@ services:
         ports:
             - 5432:5432
         volumes:
-            - db-storage:/var/lib/postgresql/data
+            - app-storage:/var/lib/postgresql/data
+
+    auth:
+        build: ./auth
+        ports:
+            - "8182:8182"
+        environment:
+            LISTEN_PORT: :8182
+        restart: always
+
+    redis:
+        image: redis
+        # network_mode: host
+        ports:
+            - 6389:6389
+        volumes:
+            - auth-storage:/var/lib/redis
+        restart: always
 volumes:
-    db-storage:
+    app-storage:
+    auth-storage:

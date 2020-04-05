@@ -1,0 +1,109 @@
+basePath: /
+definitions:
+  items.Item:
+    properties:
+      category:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+host: localhost:8181
+info:
+  contact: {}
+  description: Educational online-shop API
+  license: {}
+  title: Shop API
+  version: "1.0"
+paths:
+  /item:
+    post:
+      consumes:
+      - application/json
+      description: Add single item
+      parameters:
+      - description: Item to add
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/items.Item'
+      responses:
+        "200": {}
+      summary: Add item
+      tags:
+      - items
+    put:
+      consumes:
+      - application/json
+      description: Update single item
+      parameters:
+      - description: New item to update. Item with updated id should be already added.
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/items.Item'
+      responses:
+        "200": {}
+      summary: Update item
+      tags:
+      - items
+  /item/{id}:
+    delete:
+      description: Delete single item by id
+      parameters:
+      - description: Item id
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200": {}
+      summary: Delete item
+      tags:
+      - items
+    get:
+      description: Get single item by id
+      parameters:
+      - description: Item id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/items.Item'
+      summary: Get item
+      tags:
+      - items
+  /items:
+    get:
+      description: List all items with optional pagination
+      parameters:
+      - description: Return at most 'length' items.
+        in: query
+        name: length
+        type: integer
+      - description: Skip first 'offset' items. Must be specified with 'length'
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/items.Item'
+            type: array
+      summary: List items
+      tags:
+      - items
+swagger: "2.0"
