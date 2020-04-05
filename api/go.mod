@@ -1,4 +1,4 @@
-module github.com/CurtizJ/dummy-shop
+module github.com/CurtizJ/dummy-shop/api
 
 go 1.14
 

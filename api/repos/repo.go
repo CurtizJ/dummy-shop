@@ -1,7 +1,7 @@
 package repos
 
 import (
-	. "github.com/CurtizJ/dummy-shop/items"
+	. "github.com/CurtizJ/dummy-shop/api/items"
 )
 
 type Repo interface {

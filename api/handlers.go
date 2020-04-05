@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/CurtizJ/dummy-shop/errors"
-	"github.com/CurtizJ/dummy-shop/items"
+	"github.com/CurtizJ/dummy-shop/lib/errors"
+	"github.com/CurtizJ/dummy-shop/api/items"
 	"github.com/gorilla/mux"
 )
 
