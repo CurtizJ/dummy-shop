@@ -11,10 +11,10 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/CurtizJ/dummy-shop/repos"
+	"github.com/CurtizJ/dummy-shop/api/repos"
 	"github.com/gorilla/mux"
 
-	_ "github.com/CurtizJ/dummy-shop/docs"
+	_ "github.com/CurtizJ/dummy-shop/api/docs"
 
 	swagger "github.com/swaggo/http-swagger"
 )
