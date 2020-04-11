@@ -26,6 +26,9 @@ services:
             - "8182:8182"
         environment:
             LISTEN_PORT: :8182
+            ACCESS_TOKEN_EXPIRATION: ${ACCESS_TOKEN_EXPIRATION}
+            REFRESH_TOKEN_EXPIRATION: ${REFRESH_TOKEN_EXPIRATION}
+            AUTH_SECRET: ${AUTH_SECRET}
         restart: always
 
     redis:

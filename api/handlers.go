@@ -34,6 +34,7 @@ func handlerItem(w http.ResponseWriter, r *http.Request) {
 // @Tags items
 // @Accept  json
 // @Param item body items.Item true "Item to add"
+// @Param Authorization header string true "Access jwt token"
 // @Success 200
 // @Router /item [post]
 func handlerItemPost(item *items.Item, w http.ResponseWriter) {
@@ -51,6 +52,7 @@ func handlerItemPost(item *items.Item, w http.ResponseWriter) {
 // @Tags items
 // @Accept  json
 // @Param item body items.Item true "New item to update. Item with updated id should be already added."
+// @Param Authorization header string true "Access jwt token"
 // @Success 200
 // @Router /item [put]
 func handlerItemPut(item *items.Item, w http.ResponseWriter) {
@@ -105,6 +107,7 @@ func handlerItemGet(id uint64, w http.ResponseWriter) {
 // @Description Delete single item by id
 // @Tags items
 // @Param id path int true "Item id"
+// @Param Authorization header string true "Access jwt token"
 // @Success 200
 // @Router /item/{id} [delete]
 func handlerItemDelete(id uint64, w http.ResponseWriter) {

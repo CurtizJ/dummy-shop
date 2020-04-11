@@ -1,0 +1,50 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Small authorization service",
+        "title": "Small authorization service",
+        "contact": {},
+        "license": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8182",
+    "basePath": "/",
+    "paths": {
+        "/signup": {
+            "put": {
+                "description": "Update single item",
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Sign up",
+                "parameters": [
+                    {
+                        "description": "New item to update. Item with updated id should be already added.",
+                        "name": "item",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {}
+                }
+            }
+        }
+    },
+    "definitions": {
+        "main.User": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

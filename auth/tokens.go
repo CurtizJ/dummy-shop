@@ -19,8 +19,8 @@ func NewToken(email string) (*Token, error) {
 
 	token.Access, err = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": email,
-		"exp":   time.Now().Add(time.Second * 30).Unix(),
-	}).SignedString([]byte("kek"))
+		"exp":   time.Now().Add(time.Second * time.Duration(config.AccessExpiration)).Unix(),
+	}).SignedString([]byte(config.AuthSecret))
 
 	if err != nil {
 		return nil, err

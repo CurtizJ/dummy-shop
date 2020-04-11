@@ -1,0 +1,33 @@
+basePath: /
+definitions:
+  main.User:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+host: localhost:8182
+info:
+  contact: {}
+  description: Small authorization service
+  license: {}
+  title: Small authorization service
+  version: "1.0"
+paths:
+  /signup:
+    put:
+      consumes:
+      - application/json
+      description: Update single item
+      parameters:
+      - description: New item to update. Item with updated id should be already added.
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/main.User'
+      responses:
+        "200": {}
+      summary: Sign up
+swagger: "2.0"

@@ -1,12 +1,22 @@
 package main
 
+// @title Small authorization service
+// @version 1.0
+// @description Small authorization service
+
+// @host localhost:8182
+// @BasePath /auth
 import (
 	"fmt"
 	"net/http"
 	"os"
 
+	_ "github.com/CurtizJ/dummy-shop/auth/docs"
+
 	"github.com/go-redis/redis"
 	"github.com/gorilla/mux"
+
+	swagger "github.com/swaggo/http-swagger"
 )
 
 const (
@@ -16,6 +26,7 @@ const (
 
 var users *redis.Client
 var sessions *redis.Client
+var config *ConfigEnv
 
 func main() {
 	users = redis.NewClient(&redis.Options{
@@ -30,37 +41,24 @@ func main() {
 		DB:       SESSIONS_DATABASE,
 	})
 
-	router := mux.NewRouter().PathPrefix("/auth").Subrouter()
-	registerHandlers(router)
+	config = &ConfigEnv{}
+	err := NewConfigFromEnv(config)
+	if err != nil {
+		panic("Cannot create config")
+	}
+
+	router := mux.NewRouter()
+	registerSwagger(router)
+	routerAuth := router.PathPrefix("/auth").Subrouter()
+	registerHandlers(routerAuth)
+	http.Handle("/", router)
 
 	port, exists := os.LookupEnv("LISTEN_PORT")
 	if !exists {
-		port = ":8081"
+		port = ":8082"
 	}
 
-	fmt.Println("listening on port: ", port)
-
 	http.ListenAndServe(port, nil)
-
-	// port, exists := os.LookupEnv("LISTEN_PORT")
-	// if !exists {
-	// 	port = ":8081"
-	// }
-	// http.ListenAndServe(port, nil)
-
-	// token, err := CreateToken(uint64(228))
-	// fmt.Println(token, err)
-
-	// token1, err := jwt.Parse(token.Access, func(token *jwt.Token) (interface{}, error) {
-	// 	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-	// 		return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-	// 	}
-
-	// 	return []byte("kek"), nil
-	// })
-
-	// fmt.Println(token1.Valid)
-	// fmt.Println(token1.Claims)
 }
 
 func registerHandlers(router *mux.Router) {
@@ -68,6 +66,12 @@ func registerHandlers(router *mux.Router) {
 	router.HandleFunc("/signin", handlerSignIn).Methods("POST")
 	router.HandleFunc("/verify", handlerVerify).Methods("POST")
 	router.HandleFunc("/refresh", handlerRefresh).Methods("POST")
+}
 
-	http.Handle("/", router)
+func registerSwagger(router *mux.Router) {
+	router.PathPrefix("/swagger").Handler(swagger.WrapHandler)
+
+	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "<p>Auth service</p><a href=/swagger/>Swagger</a>")
+	})
 }

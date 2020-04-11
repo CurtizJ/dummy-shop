@@ -8,7 +8,7 @@ import (
 type ErrorCode uint
 
 const (
-	UNKNOWN_ERROR ErrorCode = iota
+	UNKNOWN_ERROR ErrorCode = 1
 	ITEM_NOT_FOUND
 	ITEM_ALREADY_EXISTS
 	USER_ALREADY_EXISTS
@@ -53,16 +53,4 @@ func (err *ItemAlreadyExistsError) Code() ErrorCode {
 
 type UserAlreadyExistsError struct {
 	UserEmail string
-}
-
-func (err *UserAlreadyExistsError) Error() string {
-	return fmt.Sprintf("User with email=%s already registered", err.UserEmail)
-}
-
-func (err *UserAlreadyExistsError) GetHTTPStatus() int {
-	return http.StatusBadRequest
-}
-
-func (err *UserAlreadyExistsError) Code() ErrorCode {
-	return USER_ALREADY_EXISTS
 }
