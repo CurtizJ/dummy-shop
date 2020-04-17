@@ -1,8 +1,7 @@
 FROM golang:latest
-WORKDIR /api
+WORKDIR /auth
 COPY go.mod .
 RUN go mod download
-COPY . .
 COPY . .
 
 # Generate docs.

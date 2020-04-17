@@ -8,9 +8,10 @@ import (
 type ErrorCode uint
 
 const (
-	UNKNOWN_ERROR ErrorCode = iota
+	UNKNOWN_ERROR ErrorCode = 1
 	ITEM_NOT_FOUND
 	ITEM_ALREADY_EXISTS
+	USER_ALREADY_EXISTS
 )
 
 type ApplicationError interface {
@@ -48,4 +49,8 @@ func (err *ItemAlreadyExistsError) GetHTTPStatus() int {
 
 func (err *ItemAlreadyExistsError) Code() ErrorCode {
 	return ITEM_ALREADY_EXISTS
+}
+
+type UserAlreadyExistsError struct {
+	UserEmail string
 }

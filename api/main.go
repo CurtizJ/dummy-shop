@@ -28,14 +28,20 @@ func main() {
 
 	port, exists := os.LookupEnv("LISTEN_PORT")
 	if !exists {
-		port = ":8080"
+		port = ":8081"
 	}
+
 	http.ListenAndServe(port, nil)
 }
 
 func registerHandlers(router *mux.Router) {
-	router.HandleFunc("/item", handlerItem).Methods("POST", "PUT")
-	router.HandleFunc("/item/{id:[0-9]+}", handlerItemId).Methods("GET", "DELETE")
+	routerSecured := router.NewRoute().Subrouter()
+	routerSecured.Use(authMiddleware)
+
+	routerSecured.HandleFunc("/item", handlerItem).Methods("POST", "PUT")
+	routerSecured.HandleFunc("/item/{id:[0-9]+}", handlerItemId).Methods("DELETE")
+
+	router.HandleFunc("/item/{id:[0-9]+}", handlerItemId).Methods("GET")
 	router.HandleFunc("/items", handlerList).Methods("GET")
 
 	router.PathPrefix("/swagger").Handler(swagger.WrapHandler)
