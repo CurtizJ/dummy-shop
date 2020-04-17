@@ -17,8 +17,6 @@ func NewConfigFromEnv(config interface{}) error {
 	value := reflect.ValueOf(config).Elem()
 	valueType := reflect.TypeOf(config).Elem()
 
-	fmt.Println("numField: ", valueType.NumField())
-
 	for i := 0; i < valueType.NumField(); i++ {
 		typeField := valueType.Field(i)
 		envName, exists := typeField.Tag.Lookup("env")
