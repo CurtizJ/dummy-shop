@@ -3,6 +3,7 @@ module github.com/CurtizJ/dummy-shop/api
 go 1.14
 
 require (
+	github.com/CurtizJ/dummy-shop v0.0.0-20200501162556-b39abf729f49 // indirect
 	github.com/CurtizJ/dummy-shop/lib v0.0.0-20200405140846-246a78b87654
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect

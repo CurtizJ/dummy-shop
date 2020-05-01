@@ -1,4 +1,8 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
+github.com/CurtizJ/dummy-shop v0.0.0-20200417224248-26e8d4dec39d h1:qqRUbv81OKd+Yr6sisYvGejLqI17QMW8AL+51WbpCHk=
+github.com/CurtizJ/dummy-shop v0.0.0-20200417224248-26e8d4dec39d/go.mod h1:ANSgItrzlaWl68iUDj5769SFyRNMZnVwaQvLz3pwQiM=
+github.com/CurtizJ/dummy-shop v0.0.0-20200501162556-b39abf729f49 h1:YULgAwmbB9Nb2NFQURsrTX7DmwgD7Q8dJt4vboMOgSo=
+github.com/CurtizJ/dummy-shop v0.0.0-20200501162556-b39abf729f49/go.mod h1:ANSgItrzlaWl68iUDj5769SFyRNMZnVwaQvLz3pwQiM=
 github.com/CurtizJ/dummy-shop/lib v0.0.0-20200405140846-246a78b87654 h1:xBuR4QBL71VoZ8D2R91Lyns2AD9P/mGlffYJs5f6qKU=
 github.com/CurtizJ/dummy-shop/lib v0.0.0-20200405140846-246a78b87654/go.mod h1:Tnyna/JUveWdWgJpGoa+HK9HUF/eMroJ2o6YagZSEqQ=
 github.com/KyleBanks/depth v1.2.1 h1:5h8fQADFrWtarTdtDudMmGsC7GPbOAu6RVB3ffsVFHc=
