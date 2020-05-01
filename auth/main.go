@@ -13,6 +13,7 @@ import (
 
 	_ "github.com/CurtizJ/dummy-shop/auth/docs"
 
+	. "github.com/CurtizJ/dummy-shop/lib/config"
 	"github.com/go-redis/redis"
 	"github.com/gorilla/mux"
 
@@ -26,7 +27,7 @@ const (
 
 var users *redis.Client
 var sessions *redis.Client
-var config *ConfigEnv
+var config *Config
 
 func main() {
 	users = redis.NewClient(&redis.Options{
@@ -41,7 +42,7 @@ func main() {
 		DB:       SESSIONS_DATABASE,
 	})
 
-	config = &ConfigEnv{}
+	config = &Config{}
 	err := NewConfigFromEnv(config)
 	if err != nil {
 		panic("Cannot create config")
