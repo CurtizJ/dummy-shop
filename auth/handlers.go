@@ -181,15 +181,14 @@ func handlerRefresh(w http.ResponseWriter, r *http.Request) {
 
 // Not a part of public api.
 func handlerConfirm(w http.ResponseWriter, r *http.Request) {
-	email := r.URL.Query()["email"][0]
 	code := r.URL.Query()["code"][0]
-	expected, err := confirmations.Get(email).Result()
+	email, err := confirmations.Get(code).Result()
 	if err != nil {
 		errors.ReportAsJSON(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	if code != expected {
+	if exists, err := users.Exists(email).Result(); err != nil || exists != 1 {
 		errors.ReportAsJSON(w, "Bad confirmation link", http.StatusBadRequest)
 		return
 	}

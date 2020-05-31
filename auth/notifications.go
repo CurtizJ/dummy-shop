@@ -14,17 +14,17 @@ import (
 type Notification struct {
 	Email   string `json:"email"`
 	Message string `json:"message"`
+	Subject string `json:"subject"`
 }
 
 func sendConfirmationLink(email string) error {
-	code := rand.Uint64()
-	if err := confirmations.Set(email, code, time.Second*60).Err(); err != nil {
+	code := strconv.FormatUint(rand.Uint64(), 10)
+	if err := confirmations.Set(code, email, time.Second*60).Err(); err != nil {
 		return err
 	}
 
 	values := url.Values{}
-	values.Set("email", email)
-	values.Set("code", strconv.FormatUint(code, 10))
+	values.Set("code", code)
 
 	u := url.URL{
 		Scheme:   "http",
@@ -36,15 +36,16 @@ func sendConfirmationLink(email string) error {
 	message, _ := json.Marshal(&Notification{
 		Email:   email,
 		Message: "Your confirmation link: " + u.String(),
+		Subject: "Email confirmation",
 	})
 
 	return notificationsChannel.Publish(
 		"",                 // exchange
 		notifications.Name, // routing key
-		false,              // mandatory
+		true,               // mandatory
 		false,              // immediate
 		amqp.Publishing{
 			ContentType: "text/plain",
-			Body:        []byte(message),
+			Body:        message,
 		})
 }

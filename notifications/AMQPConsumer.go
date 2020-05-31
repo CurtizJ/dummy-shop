@@ -70,4 +70,6 @@ func (consumer *AMQPConsumer) consume(messages <-chan amqp.Delivery, callback Me
 			}
 		}(&m)
 	}
+
+	fmt.Println("Finished consuming")
 }
