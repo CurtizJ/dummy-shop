@@ -34,8 +34,17 @@ func handlerSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := users.Set(user.Email, user.Password, 0).Err(); err != nil {
+	err = users.HMSet(user.Email, map[string]interface{}{
+		"password": user.Password,
+		"verified": 0}).Err()
+
+	if err != nil {
 		errors.ReportAsJSON(w, "Redis unavailable", http.StatusInternalServerError)
+		return
+	}
+
+	if err := sendConfirmationLink(user.Email); err != nil {
+		errors.ReportAsJSON(w, "Cannot send confirmation link", http.StatusInternalServerError)
 	}
 }
 
@@ -51,12 +60,31 @@ func handlerSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	password, err := users.Get(user.Email).Result()
-	if err == redis.Nil {
-		errors.ReportAsJSON(w, "User not found", http.StatusNotAcceptable)
+	exists, err := users.Exists(user.Email).Result()
+	if err != nil {
+		errors.ReportAsJSON(w, "Redis unavailable", http.StatusInternalServerError)
 		return
-	} else if err != nil {
-		errors.ReportAsJSON(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	if exists != 1 {
+		errors.ReportAsJSON(w, "User not found", http.StatusUnauthorized)
+		return
+	}
+
+	verified, err := users.HGet(user.Email, "verified").Int()
+	if err != nil {
+		errors.ReportAsJSON(w, "Redis unavailable", http.StatusInternalServerError)
+		return
+	}
+
+	if verified != 1 {
+		errors.ReportAsJSON(w, "Email is not verified", http.StatusUnauthorized)
+		return
+	}
+
+	password, err := users.HGet(user.Email, "password").Result()
+	if err != nil {
+		errors.ReportAsJSON(w, "Redis unavailable", http.StatusInternalServerError)
 		return
 	}
 
@@ -149,4 +177,25 @@ func handlerRefresh(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(token)
+}
+
+// Not a part of public api.
+func handlerConfirm(w http.ResponseWriter, r *http.Request) {
+	code := r.URL.Query()["code"][0]
+	email, err := confirmations.Get(code).Result()
+	if err != nil {
+		errors.ReportAsJSON(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if exists, err := users.Exists(email).Result(); err != nil || exists != 1 {
+		errors.ReportAsJSON(w, "Bad confirmation link", http.StatusBadRequest)
+		return
+	}
+
+	if err := users.HSet(email, "verified", 1).Err(); err != nil {
+		errors.ReportAsJSON(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	json.NewEncoder(w).Encode(map[string]interface{}{"email": email, "verified": 1})
 }

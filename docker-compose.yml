@@ -28,21 +28,40 @@ services:
             - "8182:8182"
         depends_on:
             - redis
+        env_file:
+            - ./auth/.env
         environment:
             LISTEN_PORT: :8182
-            ACCESS_TOKEN_EXPIRATION: ${ACCESS_TOKEN_EXPIRATION}
-            REFRESH_TOKEN_EXPIRATION: ${REFRESH_TOKEN_EXPIRATION}
-            AUTH_SECRET: ${AUTH_SECRET}
+            REDIS_ADDR: redis:6379
         restart: always
 
     redis:
         image: redis
-        # network_mode: host
         ports:
-            - 6389:6389
+            - 6379:6379
         volumes:
             - auth-storage:/var/lib/redis
         restart: always
+
+    notifications:
+        build: ./notifications
+        environment:
+            AMQP_ADDR: "amqp://guest:guest@rabbitmq:5672"
+        env_file:
+            - ./notifications/.env
+        depends_on: 
+            - rabbitmq
+        restart: always
+
+    rabbitmq:
+        image: rabbitmq
+        ports:
+            - "5672:5672"
+        volumes:
+            - notifications-storage:/var/lib/rabbitmq
+        restart: always
+
 volumes:
     app-storage:
     auth-storage:
+    notifications-storage:
