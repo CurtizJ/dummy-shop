@@ -1,0 +1,16 @@
+syntax = "proto3";
+package pb;
+
+service Verification {
+    rpc Verify (VerificationRequest) returns (VerificationResponse);
+}
+
+message VerificationRequest {
+    string accessToken = 1;
+}
+
+message VerificationResponse {
+    string userEmail = 1;
+    bool valid = 2;
+    int32 role = 3;
+}
