@@ -7,12 +7,16 @@ package main
 // @host localhost:8182
 // @BasePath /auth
 import (
+	"flag"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 
 	_ "github.com/CurtizJ/dummy-shop/auth/docs"
+	"github.com/CurtizJ/dummy-shop/lib/pb"
 	"github.com/streadway/amqp"
+	"google.golang.org/grpc"
 
 	. "github.com/CurtizJ/dummy-shop/lib/config"
 	"github.com/go-redis/redis"
@@ -45,9 +49,12 @@ func main() {
 
 	registerRedis()
 	registerRabbitMQ()
+	registerGRPC()
+	registerAdmin()
 
 	router := mux.NewRouter()
 	registerSwagger(router)
+
 	routerAuth := router.PathPrefix("/auth").Subrouter()
 	registerHandlers(routerAuth)
 	http.Handle("/", router)
@@ -65,6 +72,7 @@ func registerHandlers(router *mux.Router) {
 	router.HandleFunc("/signin", handlerSignIn).Methods("POST")
 	router.HandleFunc("/verify", handlerVerify).Methods("POST")
 	router.HandleFunc("/refresh", handlerRefresh).Methods("POST")
+	router.HandleFunc("/admin", handlerAdmin).Methods("POST")
 	router.HandleFunc("/confirm", handlerConfirm)
 }
 
@@ -119,5 +127,34 @@ func registerRabbitMQ() {
 
 	if err != nil {
 		panic("Cannot create queue in RabbitMQ: " + err.Error())
+	}
+}
+
+func registerGRPC() {
+	port, exists := os.LookupEnv("GRPC_PORT")
+	if !exists {
+		port = ":8083"
+	}
+
+	flag.Parse()
+	lis, err := net.Listen("tcp", port)
+	if err != nil {
+		panic("Failed to listen. Error: " + err.Error())
+	}
+
+	grpcServer := grpc.NewServer()
+	pb.RegisterVerificationServer(grpcServer, &VerificationServer{})
+	go grpcServer.Serve(lis)
+}
+
+func registerAdmin() {
+	fmt.Println("login: " + config.MainAdminLogin + " passw: " + config.MainAdminPassword)
+	err := users.HMSet(config.MainAdminLogin, map[string]interface{}{
+		"password": getStringHash(config.MainAdminPassword),
+		"verified": 1,
+		"role":     RoleAdmin}).Err()
+
+	if err != nil {
+		panic("Redis unavailable")
 	}
 }
