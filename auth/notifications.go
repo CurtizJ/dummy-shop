@@ -19,7 +19,7 @@ type Notification struct {
 
 func sendConfirmationLink(email string) error {
 	code := strconv.FormatUint(rand.Uint64(), 10)
-	if err := confirmations.Set(code, email, time.Second*60).Err(); err != nil {
+	if err := confirmations.Set(code, email, time.Second*300).Err(); err != nil {
 		return err
 	}
 

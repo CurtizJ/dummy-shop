@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -10,6 +12,12 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-redis/redis"
 )
+
+func getStringHash(s string) string {
+	h := sha1.New()
+	h.Write([]byte(s))
+	return hex.EncodeToString(h.Sum(nil))
+}
 
 // @Summary Sign up
 // @Accept  json
@@ -35,8 +43,9 @@ func handlerSignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = users.HMSet(user.Email, map[string]interface{}{
-		"password": user.Password,
-		"verified": 0}).Err()
+		"password": getStringHash(user.Password),
+		"verified": 0,
+		"role":     RoleUser}).Err()
 
 	if err != nil {
 		errors.ReportAsJSON(w, "Redis unavailable", http.StatusInternalServerError)
@@ -88,7 +97,7 @@ func handlerSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if user.Password != password {
+	if getStringHash(user.Password) != password {
 		errors.ReportAsJSON(w, "Incorrect password", http.StatusNotAcceptable)
 		return
 	}
@@ -177,6 +186,41 @@ func handlerRefresh(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(token)
+}
+
+// @Summary Admin
+// @Description Grant admin rights to user
+// @Param Authorization header string true "Access token"
+// @Accept  json
+// @Param user body User true "User email to grant admin rights"
+// @Success 200
+// @Router /admin [post]
+func handlerAdmin(w http.ResponseWriter, r *http.Request) {
+	accessToken, ok := r.Header["Authorization"]
+	if !ok {
+		errors.ReportAsJSON(w, "Authorization required", http.StatusUnauthorized)
+		return
+	}
+
+	response, err := VerifyAccessToken(accessToken[0])
+	if err != nil || !response.Valid || response.Role != RoleAdmin {
+		errors.ReportAsJSON(w, "Not enough rights", http.StatusUnauthorized)
+		return
+	}
+
+	var body map[string]string
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		errors.ReportAsJSON(w, "Cannot decode user", http.StatusBadRequest)
+	}
+
+	email, exists := body["email"]
+	if !exists {
+		errors.ReportAsJSON(w, "Cannot decode user", http.StatusBadRequest)
+	}
+
+	if err := users.HSet(email, "role", RoleAdmin).Err(); err != nil {
+		errors.ReportAsJSON(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 // Not a part of public api.
