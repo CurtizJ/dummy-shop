@@ -9,5 +9,3 @@ App will be run on `localhost:8181`.
 ### Documentation
 
 Swagger UI is available at `/swagger/index.html` and from the main page.
-
-[Text API description.](api.adoc)
